@@ -1,8 +1,41 @@
 * hisrabbit
+** gpt prompt
 
-** summary
+I have an array of dictionaries in data.json structured like this
+(below).
 
-This is a description of project hisrabbit.
+Let's carry out some transformations on it.
+
+Create a subset, s1, that is unique based on the .path field while
+ensuring sorting to keep the record with the youngest indexed_at
+field.
+
+Write the result to data1.json.
+#+begin_example
+[
+  {
+    "browse_url": "https://github.com/shykes/daggerverse/tree/792b8449b95393100866720e26a27e34d818738a/ollama",
+    "created_at": "2024-01-25T08:52:15Z",
+    "git_commit": "792b8449b95393100866720e26a27e34d818738a",
+    "git_url": "https://github.com/shykes/daggerverse",
+    "indexed_at": "2024-01-25T08:52:34.724422Z",
+    "path": "github.com/shykes/daggerverse/ollama",
+    "release": "",
+    "subpath": "ollama",
+    "version": "792b8449b95393100866720e26a27e34d818738a"
+  },
+  {
+    "browse_url": "https://github.com/samalba/inline-python-mod",
+    "created_at": "2024-01-25T03:04:50Z",
+    "git_commit": "e0932748103867e73f6d63165823d4a830cd358c",
+    "git_url": "https://github.com/samalba/inline-python-mod",
+    "indexed_at": "2024-01-25T03:08:33.026385Z",
+    "path": "github.com/samalba/inline-python-mod",
+    "release": "",
+    "version": "e0932748103867e73f6d63165823d4a830cd358c"
+  }
+]
+#+end_example
 
 ** usage
 
@@ -12,3 +45,4 @@ make test
 ./hisrabbit --help
 ./hisrabbit --verbose --verbose # for debug
 #+end_example
+
