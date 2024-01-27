@@ -41,8 +41,5 @@ Write the result to data1.json.
 
 Example:
 #+begin_example
-make test
-./hisrabbit --help
-./hisrabbit --verbose --verbose # for debug
+make && ./hisrabbit --data-path /Users/mtm/pdev/taylormonacelli/darksheep/daggerverse.json
 #+end_example
-
