@@ -1,0 +1,14 @@
+* hisrabbit
+
+** summary
+
+This is a description of project hisrabbit.
+
+** usage
+
+Example:
+#+begin_example
+make test
+./hisrabbit --help
+./hisrabbit --verbose --verbose # for debug
+#+end_example
