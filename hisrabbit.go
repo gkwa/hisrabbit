@@ -60,12 +60,24 @@ func run() error {
 		return fmt.Errorf("error reading data.json: %v", err)
 	}
 
-	jsonBytes, err := Uniqueify(data)
+	var records []Record
+	err = json.Unmarshal(data, &records)
+	if err != nil {
+		return fmt.Errorf("error unmarshalling JSON: %v", err)
+	}
+
+	records, err = Uniqueify(records)
 	if err != nil {
 		return fmt.Errorf("error uniqueifying data: %v", err)
 	}
 
-	err = os.WriteFile(opts.OutputDataPath, jsonBytes, 0o644)
+	// Marshal the sorted records back to JSON
+	resultJSON, err := json.MarshalIndent(records, "", "  ")
+	if err != nil {
+		return fmt.Errorf("error marshalling JSON: %v", err)
+	}
+
+	err = os.WriteFile(opts.OutputDataPath, resultJSON, 0o644)
 	if err != nil {
 		return fmt.Errorf("error writing to data1.json: %v", err)
 	}
@@ -73,13 +85,7 @@ func run() error {
 	return nil
 }
 
-func Uniqueify(jsonBytes []byte) ([]byte, error) {
-	var records []Record
-	err := json.Unmarshal(jsonBytes, &records)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
-	}
-
+func Uniqueify(records []Record) ([]Record, error) {
 	// Create a map to store unique records based on the .path field
 	uniqueRecords := make(map[string]Record)
 
@@ -105,11 +111,5 @@ func Uniqueify(jsonBytes []byte) ([]byte, error) {
 		return sortedRecords[i].IndexedAt.Before(sortedRecords[j].IndexedAt)
 	})
 
-	// Marshal the sorted records back to JSON
-	resultJSON, err := json.MarshalIndent(sortedRecords, "", "  ")
-	if err != nil {
-		return nil, fmt.Errorf("error marshalling JSON: %v", err)
-	}
-
-	return resultJSON, nil
+	return sortedRecords, nil
 }
