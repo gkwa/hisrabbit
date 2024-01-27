@@ -6,17 +6,16 @@ import (
 	"log/slog"
 	"os"
 	"sort"
-	"time"
 
 	"github.com/jessevdk/go-flags"
 )
 
 var opts struct {
-	LogFormat string `long:"log-format" choice:"text" choice:"json" default:"text" description:"Log format"`
-	Verbose   []bool `short:"v" long:"verbose" description:"Show verbose debug information, each -v bumps log level"`
-	logLevel  slog.Level
-
-	DataPath string `short:"d" long:"data-path" description:"Path to the JSON data file" required:"true"`
+	LogFormat      string `long:"log-format" choice:"text" choice:"json" default:"text" description:"Log format"`
+	Verbose        []bool `short:"v" long:"verbose" description:"Show verbose debug information, each -v bumps log level"`
+	logLevel       slog.Level
+	InputDataPath  string `short:"i" long:"input-path" description:"Path to the input JSON data file" required:"true"`
+	OutputDataPath string `short:"o" long:"output-path" description:"Path to otuput the JSON data file to"`
 }
 
 var parser *flags.Parser
@@ -56,15 +55,29 @@ func Execute() int {
 
 func run() error {
 	// Read the input JSON file
-	data, err := os.ReadFile(opts.DataPath)
+	data, err := os.ReadFile(opts.InputDataPath)
 	if err != nil {
 		return fmt.Errorf("error reading data.json: %v", err)
 	}
 
-	var records []Record
-	err = json.Unmarshal(data, &records)
+	jsonBytes, err := Uniqueify(data)
 	if err != nil {
-		return fmt.Errorf("error unmarshalling JSON: %v", err)
+		return fmt.Errorf("error uniqueifying data: %v", err)
+	}
+
+	err = os.WriteFile(opts.OutputDataPath, jsonBytes, 0o644)
+	if err != nil {
+		return fmt.Errorf("error writing to data1.json: %v", err)
+	}
+
+	return nil
+}
+
+func Uniqueify(jsonBytes []byte) ([]byte, error) {
+	var records []Record
+	err := json.Unmarshal(jsonBytes, &records)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshalling JSON: %v", err)
 	}
 
 	// Create a map to store unique records based on the .path field
@@ -95,27 +108,8 @@ func run() error {
 	// Marshal the sorted records back to JSON
 	resultJSON, err := json.MarshalIndent(sortedRecords, "", "  ")
 	if err != nil {
-		return fmt.Errorf("error marshalling JSON: %v", err)
+		return nil, fmt.Errorf("error marshalling JSON: %v", err)
 	}
 
-	// Write the result to data1.json
-	err = os.WriteFile("data1.json", resultJSON, 0o644)
-	if err != nil {
-		return fmt.Errorf("error writing to data1.json: %v", err)
-	}
-
-	return nil
-}
-
-// Record represents the structure of each record in the JSON data
-type Record struct {
-	BrowseURL string    `json:"browse_url"`
-	CreatedAt time.Time `json:"created_at"`
-	GitCommit string    `json:"git_commit"`
-	GitURL    string    `json:"git_url"`
-	IndexedAt time.Time `json:"indexed_at"`
-	Path      string    `json:"path"`
-	Release   string    `json:"release"`
-	Subpath   string    `json:"subpath"`
-	Version   string    `json:"version"`
+	return resultJSON, nil
 }
